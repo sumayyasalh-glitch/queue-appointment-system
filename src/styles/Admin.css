@@ -1,0 +1,11 @@
+.header-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.dashboard-shell .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.dashboard-shell .stats-grid .stat-card strong { overflow-wrap: anywhere; }
+
+.table-wrap table td:first-child { color: #0f766e; font-weight: 800; }
+.table-wrap td select { min-width: 145px; }
+.role-badge { background: #ccfbf1; color: #115e59; }
+
+@media (max-width: 900px) { .header-actions { width: 100%; } }
+@media (max-width: 520px) { .header-actions .outline-btn { flex: 1; } .table-wrap { margin: 0 -6px; } }

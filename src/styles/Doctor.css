@@ -1,0 +1,12 @@
+.dashboard-shell .queue-item { transition: border-color 160ms ease, box-shadow 160ms ease; }
+.dashboard-shell .queue-item:hover { border-color: #99f6e4; box-shadow: 0 8px 20px rgba(15, 118, 110, 0.08); }
+
+.current-token { padding: 4px 0; }
+.current-token button { width: 100%; margin-top: 8px; }
+.queue-details .status-pill { margin-top: 4px; width: fit-content; }
+
+@media (max-width: 520px) {
+  .dashboard-shell .queue-item { padding: 12px; }
+  .dashboard-shell .action-row { width: 100%; }
+  .dashboard-shell .action-row button { flex: 1; }
+}

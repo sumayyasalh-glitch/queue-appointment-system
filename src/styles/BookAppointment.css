@@ -1,0 +1,12 @@
+.patient-email { margin-left: auto; color: #ccfbf1; font-size: 0.9rem; overflow-wrap: anywhere; }
+
+.stacked-form input:focus,
+.stacked-form select:focus,
+.stacked-form textarea:focus,
+td select:focus { outline: 3px solid rgba(15, 118, 110, 0.2); outline-offset: 1px; border-color: #0f766e; }
+
+.dashboard-shell .appointment-actions { margin-top: 0; margin-left: auto; flex-wrap: wrap; }
+.dashboard-shell .appointment-actions button { min-height: 38px; }
+
+@media (max-width: 900px) { .patient-email { margin-left: 0; } }
+@media (max-width: 520px) { .dashboard-shell .appointment-actions { width: 100%; margin-left: 0; } .dashboard-shell .appointment-actions button { flex: 1; } }
