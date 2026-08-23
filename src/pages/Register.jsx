@@ -2,103 +2,62 @@ import { useState } from "react";
 import "../styles/Login.css";
 import "../styles/Register.css";
 
-export default function Register({
-  setPage,
-  users,
-  addUser,
-}) {
+export default function Register({ setPage, onRegister }) {
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("Patient");
 
-  const [newUsername, setNewUsername] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newRole, setNewRole] = useState("");
-
-  const handleCreateAccount = () => {
-
-    if (!newUsername || !newPassword || !newEmail || !newRole) {
+  const handleCreateAccount = async () => {
+    if (!fullName || !password || !email || !role) {
       alert("Fill all fields");
       return;
     }
 
-    const usernameExists = users.some((user) => user.username === newUsername);
-
-    if (usernameExists) {
-      alert("Username already exists");
-      return;
-    }
-
-    const newUser = {
-      username: newUsername,
-      password: newPassword,
-      email:newEmail,
-      role: newRole,
-      fullName: newUsername,
-      department: newRole === "Doctor" ? "General Medicine" : newRole,
-    };
-
-    addUser(newUser);
-
-    alert("Account Created Successfully");
-
-    setPage("login");
+    await onRegister({ fullName, password, email, role });
   };
 
   return (
     <div className="login-page">
-
       <nav className="navbar">
-
         <h2>QueueCare</h2>
-
-        <button
-          className="login-btn"
-          onClick={() => setPage("login")}
-        >
+        <button className="login-btn" onClick={() => setPage("login")}>
           Go Back
         </button>
-
       </nav>
 
       <div className="login-container">
-
         <h1>Create Account</h1>
 
         <input
           type="text"
-          placeholder="Create Username"
-          value={newUsername}
-          onChange={(e) => setNewUsername(e.target.value)}
+          placeholder="Full Name"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
         />
 
         <input
           type="password"
           placeholder="Create Password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
-        <input
-  type="email"
-  placeholder="Create Email"
-  value={newEmail}
-  onChange={(e) => setNewEmail(e.target.value)}
-/>
 
-        <select
-          value={newRole}
-          onChange={(e) => setNewRole(e.target.value)}
-        >
-          <option value="">Select Role</option>
-          <option>Doctor</option>
-          <option>Admin</option>
-          <option>Patient</option>
+        <input
+          type="email"
+          placeholder="Create Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="Patient">Patient</option>
+          <option value="Doctor">Doctor</option>
+          <option value="Admin">Admin</option>
         </select>
 
-        <button onClick={handleCreateAccount}>
-          Create Account
-        </button>
-
+        <button onClick={handleCreateAccount}>Create Account</button>
       </div>
-
     </div>
   );
 }

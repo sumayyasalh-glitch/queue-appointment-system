@@ -1,71 +1,38 @@
 import { useState } from "react";
 import "../styles/Login.css";
 
-export default function Login({ setPage, users, setCurrentUser,currentUser }) {
-
-  const [username, setUsername] = useState("");
+export default function Login({ setPage, onLogin, currentUser }) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("Patient");
 
-  const handleLogin = () => {
-
-    const foundUser = users.find(
-      (user) =>
-        user.username === username &&
-        user.password === password &&
-        user.role === role
-    );
-
-    if (foundUser) {
-      setCurrentUser(foundUser);
-
-      if (role === "Doctor") {
-        setPage("doctor");
-      }
-
-      else if (role === "Admin") {
-        setPage("admin");
-      }
-
-      else {
-        setPage("patient");
-      }
-
-    } else {
-      alert("Invalid Username or Password");
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Enter email and password");
+      return;
     }
+
+    await onLogin(email, password, role);
   };
 
   return (
     <div className="login-page">
-<nav className="navbar">
-
-  <h2>QueueCare</h2>
-
-  <div className="navbar-email">
-    {currentUser?.email || ""}
-  </div>
-
-  <button
-    className="login-btn"
-    onClick={() => setPage("home")}
-  >
-    Go Back
-  </button>
-
-</nav>
-     
-      
+      <nav className="navbar">
+        <h2>QueueCare</h2>
+        <div className="navbar-email">{currentUser?.email || ""}</div>
+        <button className="login-btn" onClick={() => setPage("home")}>
+          Go Back
+        </button>
+      </nav>
 
       <div className="login-container">
-
         <h1>Login</h1>
 
         <input
-          type="text"
-          placeholder="Enter Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          placeholder="Enter Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
@@ -75,34 +42,21 @@ export default function Login({ setPage, users, setCurrentUser,currentUser }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-        >
-          <option value="">Select Role</option>
-          <option>Doctor</option>
-          <option>Admin</option>
-          <option>Patient</option>
+        <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="Patient">Patient</option>
+          <option value="Doctor">Doctor</option>
+          <option value="Admin">Admin</option>
         </select>
 
-        <button onClick={handleLogin}>
-          Login
-        </button>
+        <button onClick={handleLogin}>Login</button>
 
         <p className="new-user">
           New User?
-
-          <button
-            className="create-account-btn"
-            onClick={() => setPage("register")}
-          >
+          <button className="create-account-btn" onClick={() => setPage("register")}>
             Create Account
           </button>
-
         </p>
-
       </div>
-
     </div>
   );
 }
