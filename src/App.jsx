@@ -101,9 +101,12 @@ function App() {
   useEffect(() => {
     if (!currentUser) return;
 
+    void Promise.resolve().then(loadDoctors);
+
     // The request updates state after the effect returns.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAppointments();
+    // Reload doctors after login so a new patient never uses a stale anonymous result.
   }, [currentUser]);
 
   const handleLogin = async (email, password, selectedRole) => {
