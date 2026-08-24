@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = configuredApiUrl.replace(/\/$/, "").endsWith("/api")
+  ? configuredApiUrl.replace(/\/$/, "")
+  : `${configuredApiUrl.replace(/\/$/, "")}/api`;
 
 const toLocalDateInputValue = (dateValue) => {
   const date = new Date(dateValue);
