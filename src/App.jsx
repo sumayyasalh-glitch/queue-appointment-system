@@ -35,6 +35,8 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [doctorsLoading, setDoctorsLoading] = useState(true);
+  const [doctorLoadError, setDoctorLoadError] = useState("");
   const [appointments, setAppointments] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -58,6 +60,8 @@ function App() {
   };
 
   const loadDoctors = async () => {
+    setDoctorsLoading(true);
+    setDoctorLoadError("");
     try {
       const response = await api.get("/users/doctors");
       const doctorList = (response.data.doctors || []).map(mapUser);
@@ -65,6 +69,9 @@ function App() {
       setUsers((prev) => [...prev.filter((u) => u.role !== "Doctor"), ...doctorList]);
     } catch (error) {
       console.error("Failed to load doctors", error);
+      setDoctorLoadError(getApiErrorMessage(error, "Unable to load doctors"));
+    } finally {
+      setDoctorsLoading(false);
     }
   };
 
@@ -342,6 +349,9 @@ function App() {
         <Patient
           currentUser={currentUser}
           doctors={doctors}
+          doctorsLoading={doctorsLoading}
+          doctorLoadError={doctorLoadError}
+          reloadDoctors={loadDoctors}
           appointments={appointments}
           addAppointment={addAppointment}
           cancelAppointment={cancelAppointment}

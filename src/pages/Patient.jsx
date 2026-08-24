@@ -53,6 +53,9 @@ const analyzeReason = (reason) => {
 export default function Patient({
   currentUser,
   doctors,
+  doctorsLoading,
+  doctorLoadError,
+  reloadDoctors,
   appointments,
   addAppointment,
   cancelAppointment,
@@ -257,10 +260,12 @@ export default function Patient({
               name="doctorName"
               value={form.doctorName}
               onChange={handleChange}
-              disabled={doctors.length === 0}
+              disabled={doctorsLoading || doctors.length === 0}
               required
             >
-              {doctors.length === 0 ? (
+              {doctorsLoading ? (
+                <option value="">Loading doctors...</option>
+              ) : doctors.length === 0 ? (
                 <option value="">No doctors available</option>
               ) : (
                 [<option key="placeholder" value="">Select a doctor</option>, ...doctors.map((doctor) => (
@@ -270,6 +275,14 @@ export default function Patient({
                 ))]
               )}
             </select>
+            {doctorLoadError && (
+              <div className="booking-message" role="alert">
+                {doctorLoadError}
+                <button type="button" className="secondary-action" onClick={reloadDoctors}>
+                  Try Again
+                </button>
+              </div>
+            )}
             <input
               name="department"
               placeholder="Department"
