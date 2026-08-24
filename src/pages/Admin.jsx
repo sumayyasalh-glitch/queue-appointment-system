@@ -2,6 +2,12 @@ import { useState } from "react";
 import "../styles/Dashboard.css";
 import "../styles/Admin.css";
 
+const getLocalDateInputValue = (date = new Date()) => {
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60000);
+  return localDate.toISOString().split("T")[0];
+};
+
 export default function Admin({
   users,
   addUser,
@@ -12,7 +18,6 @@ export default function Admin({
 }) {
   const [form, setForm] = useState({
     fullName: "",
-    username: "",
     password: "",
     email: "",
     role: "Doctor",
@@ -23,29 +28,25 @@ export default function Admin({
   const patients = users.filter((user) => user.role === "Patient");
   const waiting = appointments.filter((item) => item.status === "Waiting");
   const inConsultation = appointments.filter((item) => item.status === "In Consultation");
-  const today = new Date().toISOString().split("T")[0];
+  const completed = appointments.filter((item) => item.status === "Completed");
+  const today = getLocalDateInputValue();
   const todayAppointments = appointments.filter((apt) => apt.date === today);
 
   const handleChange = (event) => {
     setForm({ ...form, [event.target.name]: event.target.value });
   };
 
-  const handleAddUser = (event) => {
+  const handleAddUser = async (event) => {
     event.preventDefault();
 
-    if (!form.fullName || !form.username || !form.password || !form.email) {
+    if (!form.fullName || !form.password || !form.email) {
       alert("Fill all user fields");
       return;
     }
 
-    const exists = users.some((user) => user.username === form.username);
+    const createdUser = await addUser(form);
+    if (!createdUser) return;
 
-    if (exists) {
-      alert("Username already exists");
-      return;
-    }
-
-    addUser(form);
     alert("User added successfully!");
     setForm({
       fullName: "",
@@ -94,7 +95,11 @@ export default function Admin({
         </article>
         <article className="stat-card">
           <span>✅ Completed Today</span>
-          <strong>{todayAppointments.filter(a => a.status === "Completed").length}</strong>
+          <strong>{todayAppointments.filter((a) => a.status === "Completed").length}</strong>
+        </article>
+        <article className="stat-card">
+          <span>✅ All Completed</span>
+          <strong>{completed.length}</strong>
         </article>
         <article className="stat-card">
           <span>📅 Total Appointments</span>
@@ -114,12 +119,6 @@ export default function Admin({
               name="fullName"
               placeholder="Full name"
               value={form.fullName}
-              onChange={handleChange}
-            />
-            <input
-              name="username"
-              placeholder="Username"
-              value={form.username}
               onChange={handleChange}
             />
             <input

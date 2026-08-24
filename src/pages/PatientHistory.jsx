@@ -6,14 +6,14 @@ export default function PatientHistory({
   appointments,
   cancelAppointment,
   rescheduleAppointment,
-  onLogout,
   setPage
 }) {
   const patientName = currentUser?.fullName || currentUser?.username || "Patient";
 
   // Get all appointments for this patient
-  const myAppointments = appointments.filter(
-    (appointment) => appointment.patientName === patientName
+  const myAppointments = appointments.filter((appointment) =>
+    String(appointment.patientId) === String(currentUser?.id || currentUser?._id) ||
+    appointment.patientName === patientName
   );
 
   // Separate by status
@@ -21,7 +21,7 @@ export default function PatientHistory({
     (apt) => apt.status === "Completed"
   );
   const upcomingAppointments = myAppointments.filter(
-    (apt) => apt.status === "Waiting" || apt.status === "In Consultation"
+    (apt) => ["Pending", "Confirmed", "Waiting", "In Consultation"].includes(apt.status)
   );
   const cancelledAppointments = myAppointments.filter(
     (apt) => apt.status === "Cancelled"

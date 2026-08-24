@@ -12,6 +12,11 @@ export default function Login({ setPage, onLogin, currentUser }) {
       return;
     }
 
+    if (password.length < 8) {
+      alert("Password must be at least 8 characters");
+      return;
+    }
+
     await onLogin(email, password, role);
   };
 
@@ -46,6 +51,7 @@ export default function Login({ setPage, onLogin, currentUser }) {
           <option value="Patient">Patient</option>
           <option value="Doctor">Doctor</option>
           <option value="Admin">Admin</option>
+        
         </select>
 
         <button onClick={handleLogin}>Login</button>

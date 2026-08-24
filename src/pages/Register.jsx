@@ -6,11 +6,21 @@ export default function Register({ setPage, onRegister }) {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("Patient");
+  const [role, setRole] = useState("patient");
 
   const handleCreateAccount = async () => {
-    if (!fullName || !password || !email || !role) {
+    if (!fullName || !password || !email) {
       alert("Fill all fields");
+      return;
+    }
+
+    if (fullName.trim().length < 2) {
+      alert("Name must be at least 2 characters");
+      return;
+    }
+
+    if (password.length < 8) {
+      alert("Password must be at least 8 characters");
       return;
     }
 
@@ -51,9 +61,10 @@ export default function Register({ setPage, onRegister }) {
         />
 
         <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="Patient">Patient</option>
-          <option value="Doctor">Doctor</option>
-          <option value="Admin">Admin</option>
+          <option value="patient">Patient</option>
+          <option value="doctor">Doctor</option>
+          
+          <option value="admin">Admin</option>
         </select>
 
         <button onClick={handleCreateAccount}>Create Account</button>

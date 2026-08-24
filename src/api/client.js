@@ -2,6 +2,13 @@ import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+const toLocalDateInputValue = (dateValue) => {
+  const date = new Date(dateValue);
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60000);
+  return localDate.toISOString().split("T")[0];
+};
+
 const api = axios.create({
   baseURL: API_BASE_URL,
 });
@@ -27,9 +34,7 @@ export const normalizeAppointment = (appointment) => {
     patientEmail: patient.email || "",
     doctorName: doctor.fullName || "Doctor",
     doctorEmail: doctor.email || "",
-    date: appointment.date
-      ? new Date(appointment.date).toISOString().split("T")[0]
-      : "",
+    date: appointment.date ? toLocalDateInputValue(appointment.date) : "",
     time: appointment.timeSlot || appointment.time || "",
     reason: appointment.reason || "",
     status: appointment.status || "Pending",
@@ -39,5 +44,15 @@ export const normalizeAppointment = (appointment) => {
     raw: appointment,
   };
 };
+
+export const getApiErrorMessage = (error, fallback) => {
+  if (!error.response) {
+    return "Cannot connect to the backend. Run: cd backend; npm start";
+  }
+
+  return error.response.data?.message || fallback;
+};
+
+export const getLocalDateInputValue = (date = new Date()) => toLocalDateInputValue(date);
 
 export default api;

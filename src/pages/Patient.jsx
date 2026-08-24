@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/Dashboard.css";
 import "../styles/BookAppointment.css";
+
+const getLocalDateInputValue = (date = new Date()) => {
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60000);
+  return localDate.toISOString().split("T")[0];
+};
 
 const analyzeReason = (reason) => {
   const text = reason.toLowerCase();
@@ -56,23 +62,52 @@ export default function Patient({
 }) {
   const patientName = currentUser?.fullName || currentUser?.username || "Patient";
   const patientEmail = currentUser?.email || "NO EMAIL";
-  const firstDoctor = doctors[0]?.fullName || "";
   const [form, setForm] = useState({
-    doctorName: firstDoctor,
-    department: doctors[0]?.department || "General Medicine",
-    date: "2026-05-20",
+    doctorId: "",
+    doctorName: "",
+    department: "General Medicine",
+    date: getLocalDateInputValue(),
     time: "12:00",
     reason: "",
   });
   const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [isBooking, setIsBooking] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState("");
 
-  const myAppointments = appointments.filter(
-    (appointment) => appointment.patientName === patientName
+  useEffect(() => {
+    if (doctors.length > 0) {
+      const defaultDoctor = doctors[0];
+      // Keep the first available doctor selected after the API response arrives.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setForm((prev) => {
+        const hasValidSelection = doctors.some(
+          (doctor) =>
+            String(doctor.id || doctor._id) === String(prev.doctorId) ||
+            doctor.fullName === prev.doctorName
+        );
+
+        if (hasValidSelection) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          doctorId: defaultDoctor.id || defaultDoctor._id,
+          doctorName: defaultDoctor.fullName,
+          department: defaultDoctor.department || "General Medicine",
+          date: prev.date || getLocalDateInputValue(),
+        };
+      });
+    }
+  }, [doctors]);
+
+  const myAppointments = appointments.filter((appointment) =>
+    String(appointment.patientId) === String(currentUser?.id || currentUser?._id) ||
+    appointment.patientName === patientName
   );
   const currentToken = myAppointments.find(
     (appointment) =>
-      appointment.status === "Waiting" ||
-      appointment.status === "In Consultation"
+      ["Pending", "Confirmed", "Waiting", "In Consultation"].includes(appointment.status)
   );
 
   const handleChange = (event) => {
@@ -82,6 +117,7 @@ export default function Patient({
       const selectedDoctor = doctors.find((doctor) => doctor.fullName === value);
       setForm({
         ...form,
+        doctorId: selectedDoctor ? selectedDoctor.id || selectedDoctor._id : "",
         doctorName: value,
         department: selectedDoctor?.department || form.department,
       });
@@ -102,32 +138,72 @@ export default function Patient({
     setForm({ ...form, department: suggestion.department });
   };
 
-  const handleBookAppointment = (event) => {
-    event.preventDefault();
+ const handleBookAppointment = async (event) => {
+  event.preventDefault();
 
-    if (!form.doctorName || !form.date || !form.time || !form.reason) {
-      alert("Fill all appointment details");
-      return;
-    }
+  if (isBooking) return;
+  setBookingMessage("");
 
-    // Get the selected doctor's email
-    const selectedDoctor = doctors.find((doc) => doc.fullName === form.doctorName);
-    const doctorEmail = selectedDoctor?.email || "";
+  const doctorName = form.doctorName?.trim();
+  const date = form.date?.trim();
+  const time = form.time?.trim();
+  const reason = form.reason?.trim();
 
-    addAppointment({
-      ...form,
-      patientName,
-      patientEmail,
-      doctorEmail,
-      aiNote: aiSuggestion
-        ? `${aiSuggestion.urgency} | ${aiSuggestion.waitTime} | ${aiSuggestion.advice}`
-        : "Not analyzed",
-    });
+  if (!doctorName) {
+    setBookingMessage(doctors.length === 0 ? "No doctors are available right now." : "Please select a doctor.");
+    return;
+  }
 
-    setForm({ ...form, reason: "" });
-    setAiSuggestion(null);
+  if (!date || !time) {
+    setBookingMessage("Please select an appointment date and time.");
+    return;
+  }
+
+  const selectedDoctor = doctors.find(
+    (doctor) =>
+      String(doctor.id || doctor._id) === String(form.doctorId) ||
+      doctor.fullName === doctorName
+  );
+
+  if (!selectedDoctor) {
+    alert("Please select a valid doctor");
+    return;
+  }
+
+  const appointmentData = {
+    doctorName: doctorName,
+    department: form.department,
+    date: date,
+    time: time,
+    reason: reason,
+    patientName: patientName,
+    patientEmail: patientEmail,
+    aiNote: aiSuggestion
+      ? `${aiSuggestion.urgency} | ${aiSuggestion.waitTime} | ${aiSuggestion.advice}`
+      : "Not analyzed",
   };
 
+  try {
+    setIsBooking(true);
+    const createdAppointment = await addAppointment(appointmentData);
+    if (!createdAppointment) {
+      throw new Error("Unable to book appointment");
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      reason: "",
+    }));
+
+    setAiSuggestion(null);
+    setBookingMessage(`Appointment booked. Token number: ${createdAppointment.token}`);
+  } catch (error) {
+    console.error("Booking error:", error);
+    setBookingMessage(error.message || "Failed to book appointment. Please try again.");
+  } finally {
+    setIsBooking(false);
+  }
+};
   return (
     <main className="dashboard-shell">
       <header className="dashboard-topbar">
@@ -181,12 +257,18 @@ export default function Patient({
               name="doctorName"
               value={form.doctorName}
               onChange={handleChange}
+              disabled={doctors.length === 0}
+              required
             >
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.fullName}>
-                  {doctor.fullName}
-                </option>
-              ))}
+              {doctors.length === 0 ? (
+                <option value="">No doctors available</option>
+              ) : (
+                [<option key="placeholder" value="">Select a doctor</option>, ...doctors.map((doctor) => (
+                  <option key={doctor.id || doctor._id} value={doctor.fullName}>
+                    {doctor.fullName}
+                  </option>
+                ))]
+              )}
             </select>
             <input
               name="department"
@@ -199,12 +281,14 @@ export default function Patient({
               type="date"
               value={form.date}
               onChange={handleChange}
+              required
             />
             <input
               name="time"
               type="time"
               value={form.time}
               onChange={handleChange}
+              required
             />
             <textarea
               name="reason"
@@ -225,7 +309,10 @@ export default function Patient({
                 <p>{aiSuggestion.advice}</p>
               </div>
             )}
-            <button type="submit">Book Appointment</button>
+            <button type="submit" disabled={isBooking}>
+              {isBooking ? "Booking..." : "Book Appointment"}
+            </button>
+            {bookingMessage && <p className="booking-message" role="status">{bookingMessage}</p>}
           </form>
         </div>
 

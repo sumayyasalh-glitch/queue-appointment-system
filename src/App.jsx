@@ -11,13 +11,12 @@ import Patient from "./pages/Patient";
 import PatientHistory from "./pages/PatientHistory";
 import QueuePage from "./pages/QueuePage";
 import Notifications from "./components/Notifications";
-import api, { normalizeAppointment } from "./api/client";
+import api, { getApiErrorMessage, normalizeAppointment } from "./api/client";
 
 const normalizeRole = (role = "patient") => {
   const value = String(role).toLowerCase();
   if (value === "admin") return "Admin";
   if (value === "doctor") return "Doctor";
-  if (value === "staff") return "Staff";
   return "Patient";
 };
 
@@ -52,7 +51,7 @@ function App() {
     try {
       const response = await api.get("/users/me");
       setCurrentUser(mapUser(response.data.user));
-    } catch (error) {
+    } catch {
       setCurrentUser(null);
       persistToken(null);
     }
@@ -80,22 +79,23 @@ function App() {
   };
 
   useEffect(() => {
+    void Promise.resolve().then(loadDoctors);
+
     const savedToken = localStorage.getItem("queuecare_token");
     if (!savedToken) {
-      setCurrentUser(null);
       return;
     }
 
-    fetchCurrentUser();
+    void Promise.resolve().then(fetchCurrentUser);
+    // Bootstrap once on mount; the request function is intentionally stable for this load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (!currentUser) {
-      setAppointments([]);
-      return;
-    }
+    if (!currentUser) return;
 
-    loadDoctors();
+    // The request updates state after the effect returns.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAppointments();
   }, [currentUser]);
 
@@ -119,7 +119,7 @@ function App() {
 
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || "Login failed";
+      const message = getApiErrorMessage(error, "Login failed");
       alert(message);
       return { success: false, message };
     }
@@ -141,7 +141,7 @@ function App() {
         return { success: true };
       }
     } catch (error) {
-      const message = error.response?.data?.message || "Registration failed";
+      const message = getApiErrorMessage(error, "Registration failed");
       alert(message);
       return { success: false, message };
     }
@@ -196,8 +196,7 @@ function App() {
       return created;
     } catch (error) {
       const message = error.response?.data?.message || "Unable to book appointment";
-      alert(message);
-      return null;
+      throw new Error(message, { cause: error });
     }
   };
 
@@ -359,7 +358,6 @@ function App() {
           appointments={appointments}
           cancelAppointment={cancelAppointment}
           rescheduleAppointment={rescheduleAppointment}
-          onLogout={handleLogout}
           setPage={setPage}
         />
       )}
