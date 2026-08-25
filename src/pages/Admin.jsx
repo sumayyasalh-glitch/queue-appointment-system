@@ -111,7 +111,7 @@ export default function Admin({
         <div className="panel">
           <div className="panel-heading">
             <h2>Add User</h2>
-            <p>Create doctor, patient, or admin accounts.</p>
+            <p>Create doctor,admin accounts.</p>
           </div>
 
           <form className="stacked-form" onSubmit={handleAddUser}>
