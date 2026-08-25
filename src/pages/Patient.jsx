@@ -68,7 +68,7 @@ export default function Patient({
   const [form, setForm] = useState({
     doctorId: "",
     doctorName: "",
-    department: "General Medicine",
+    department: "",
     date: getLocalDateInputValue(),
     time: "12:00",
     reason: "",
