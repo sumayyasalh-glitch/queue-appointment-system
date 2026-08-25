@@ -136,7 +136,6 @@ export default function Admin({
             />
             <select name="role" value={form.role} onChange={handleChange}>
               <option>Doctor</option>
-              <option>Patient</option>
               <option>Admin</option>
             </select>
             <input
