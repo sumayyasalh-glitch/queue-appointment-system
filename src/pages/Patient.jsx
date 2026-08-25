@@ -27,7 +27,7 @@ const analyzeReason = (reason) => {
   if (urgentWords.some((word) => text.includes(word))) {
     return {
       urgency: "Urgent",
-      department: "General Medicine",
+      department: "",
       waitTime: "Estimated 10-20 minutes",
       advice: "Keep previous reports ready and drink water unless advised otherwise.",
     };
@@ -36,7 +36,7 @@ const analyzeReason = (reason) => {
   if (followUpWords.some((word) => text.includes(word))) {
     return {
       urgency: "Normal",
-      department: "General Medicine",
+      department: "",
       waitTime: "Estimated 20-40 minutes",
       advice: "Bring your earlier prescription, reports, and medicine list.",
     };
@@ -44,7 +44,7 @@ const analyzeReason = (reason) => {
 
   return {
     urgency: "Normal",
-    department: "General Medicine",
+    department: "",
     waitTime: "Estimated 20-45 minutes",
     advice: "Share clear symptoms, duration, allergies, and current medicines with the doctor.",
   };
@@ -97,7 +97,7 @@ export default function Patient({
           ...prev,
           doctorId: defaultDoctor.id || defaultDoctor._id,
           doctorName: defaultDoctor.fullName,
-          department: defaultDoctor.department || "General Medicine",
+          department: defaultDoctor.department || "",
           date: prev.date || getLocalDateInputValue(),
         };
       });
@@ -131,15 +131,14 @@ export default function Patient({
   };
 
   const handleAiAnalyze = () => {
-    if (!form.reason.trim()) {
-      alert("Enter symptoms or reason first");
-      return;
-    }
+  if (!form.reason.trim()) {
+    alert("Enter symptoms or reason first");
+    return;
+  }
 
-    const suggestion = analyzeReason(form.reason);
-    setAiSuggestion(suggestion);
-    setForm({ ...form, department: suggestion.department });
-  };
+  const suggestion = analyzeReason(form.reason);
+  setAiSuggestion(suggestion);
+};
 
  const handleBookAppointment = async (event) => {
   event.preventDefault();
