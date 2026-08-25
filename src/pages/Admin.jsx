@@ -21,7 +21,7 @@ export default function Admin({
     password: "",
     email: "",
     role: "Doctor",
-    department: "General Medicine",
+    department: "",
   });
 
   const doctors = users.filter((user) => user.role === "Doctor");
@@ -54,7 +54,7 @@ export default function Admin({
       password: "",
       email: "",
       role: "Doctor",
-      department: "General Medicine",
+      department: "",
     });
   };
 
