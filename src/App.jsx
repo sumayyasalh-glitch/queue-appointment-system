@@ -27,7 +27,7 @@ const mapUser = (user = {}) => ({
   username: user.email ? user.email.split("@")[0] : user.username || "user",
   email: user.email || "",
   role: normalizeRole(user.role),
-  department: user.department || (user.role === "doctor" ? "General Medicine" : ""),
+  department: user.department ||  "",
 });
 
 function App() {
