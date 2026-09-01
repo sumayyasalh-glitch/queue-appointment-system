@@ -164,6 +164,7 @@ function App() {
         email: userPayload.email,
         password: userPayload.password,
         role: String(userPayload.role || "patient").toLowerCase(),
+        department: userPayload.department || "",
       };
 
       const response = await api.post("/users", payload);
