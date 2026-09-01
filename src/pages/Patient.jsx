@@ -11,10 +11,43 @@ const getLocalDateInputValue = (date = new Date()) => {
 const analyzeReason = (reason) => {
   const text = reason.toLowerCase();
 
-  const emergencyWords = ["chest pain", "breathing", "unconscious", "stroke", "severe bleeding"];
-  const urgentWords = ["fever", "vomiting", "dizziness", "infection", "high bp", "blood pressure"];
-  const followUpWords = ["follow", "routine", "checkup", "report", "review"];
+  const emergencyWords = [
+  "chest pain",
+  "difficulty breathing",
+  "shortness of breath",
+  "unconscious",
+  "severe bleeding",
+  "heavy bleeding",
+  "stroke",
+  "seizure",
+  "fainting",
+  "severe allergic reaction"
+];
 
+const urgentWords = [
+  "high fever",
+  "fever",
+  "vomiting",
+  "dizziness",
+  "infection",
+  "severe pain",
+  "severe headache",
+  "persistent cough",
+  "dehydration",
+  "abdominal pain"
+];
+
+const followupWords = [
+  "follow up",
+  "routine",
+  "checkup",
+  "report",
+  "mild headache",
+  "common cold",
+  "runny nose",
+  "sore throat",
+  "mild cough"
+];
   if (emergencyWords.some((word) => text.includes(word))) {
     return {
       urgency: "Emergency",
