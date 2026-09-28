@@ -11,6 +11,7 @@ import Patient from "./pages/Patient";
 import PatientHistory from "./pages/PatientHistory";
 import QueuePage from "./pages/QueuePage";
 import Notifications from "./components/Notifications";
+import ChatBot from "./components/ChatBot";
 import api, { getApiErrorMessage, normalizeAppointment } from "./api/client";
 
 const normalizeRole = (role = "patient") => {
@@ -52,7 +53,11 @@ function App() {
   const fetchCurrentUser = async () => {
     try {
       const response = await api.get("/users/me");
-      setCurrentUser(mapUser(response.data.user));
+      const restoredUser = mapUser(response.data.user);
+      setCurrentUser(restoredUser);
+      if (restoredUser.role === "Doctor") setPage("doctor");
+      else if (restoredUser.role === "Admin") setPage("admin");
+      else setPage("patient");
     } catch {
       setCurrentUser(null);
       persistToken(null);
@@ -72,6 +77,15 @@ function App() {
       setDoctorLoadError(getApiErrorMessage(error, "Unable to load doctors"));
     } finally {
       setDoctorsLoading(false);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const response = await api.get("/users");
+      setUsers((response.data.users || []).map(mapUser));
+    } catch (error) {
+      console.error("Failed to load users", error);
     }
   };
 
@@ -102,6 +116,7 @@ function App() {
     if (!currentUser) return;
 
     void Promise.resolve().then(loadDoctors);
+    if (currentUser.role === "Admin") void Promise.resolve().then(loadUsers);
 
     // The request updates state after the effect returns.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -191,6 +206,11 @@ function App() {
         date: appointment.date,
         timeSlot: appointment.time,
         reason: appointment.reason,
+        patientName: appointment.patientName,
+        patientContact: appointment.patientContact,
+        relationship: appointment.relationship,
+        paymentMethod: appointment.paymentMethod,
+        paymentStatus: appointment.paymentStatus,
       });
 
       const created = normalizeAppointment(response.data.appointment);
@@ -236,6 +256,37 @@ function App() {
     } catch (error) {
       const message = error.response?.data?.message || "Unable to update appointment";
       alert(message);
+    }
+  };
+
+  const updatePaymentStatus = async (id, paymentStatus) => {
+    const appointment = appointments.find((app) => String(app.id) === String(id) || String(app._id) === String(id));
+    if (!appointment) return;
+
+    try {
+      const response = await api.patch(`/appointments/${appointment._id || id}`, { paymentStatus });
+      const updated = normalizeAppointment(response.data.appointment);
+      setAppointments((prev) =>
+        prev.map((item) => {
+          const itemId = item._id || item.id;
+          const nextId = updated._id || updated.id;
+          return String(itemId) === String(nextId) ? updated : item;
+        })
+      );
+    } catch (error) {
+      const message = error.response?.data?.message || "Unable to update payment status";
+      alert(message);
+    }
+  };
+
+  const callNextPatient = async (date) => {
+    try {
+      const response = await api.post("/queue/next", { date });
+      await loadAppointments();
+      return response.data.appointment;
+    } catch (error) {
+      const message = error.response?.data?.message || "Unable to call the next patient";
+      throw new Error(message, { cause: error });
     }
   };
 
@@ -328,6 +379,8 @@ function App() {
           currentUser={currentUser}
           appointments={appointments}
           updateAppointmentStatus={updateAppointmentStatus}
+          callNextPatient={callNextPatient}
+          refreshAppointments={loadAppointments}
           cancelAppointment={cancelAppointment}
           rescheduleAppointment={rescheduleAppointment}
           onLogout={handleLogout}
@@ -341,6 +394,7 @@ function App() {
           addUser={addUser}
           appointments={appointments}
           updateAppointmentStatus={updateAppointmentStatus}
+          updatePaymentStatus={updatePaymentStatus}
           cancelAppointment={cancelAppointment}
           rescheduleAppointment={rescheduleAppointment}
           onLogout={handleLogout}
@@ -379,6 +433,8 @@ function App() {
       {page === "queue" && (
         <QueuePage appointments={appointments} setPage={setPage} />
       )}
+
+      <ChatBot currentUser={currentUser} appointments={appointments} setPage={setPage} />
     </div>
   );
 }

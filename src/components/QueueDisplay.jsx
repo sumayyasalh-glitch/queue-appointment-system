@@ -1,5 +1,7 @@
 import "../styles/Dashboard.css";
 
+const queuedStatuses = ["Pending", "Confirmed", "Waiting"];
+
 export default function QueueDisplay({ appointments, currentDate }) {
   // Get today's appointments sorted by time
   const todayAppointments = appointments
@@ -7,7 +9,7 @@ export default function QueueDisplay({ appointments, currentDate }) {
     .sort((a, b) => a.time.localeCompare(b.time));
 
   // Separate by status for queue view
-  const waitingQueue = todayAppointments.filter((apt) => apt.status === "Waiting");
+  const waitingQueue = todayAppointments.filter((apt) => queuedStatuses.includes(apt.status));
   const inConsultation = todayAppointments.find((apt) => apt.status === "In Consultation");
   const completedToday = todayAppointments.filter((apt) => apt.status === "Completed");
 

@@ -10,77 +10,27 @@ const getLocalDateInputValue = (date = new Date()) => {
 
 const analyzeReason = (reason) => {
   const text = reason.toLowerCase();
+  const emergencyWords = ["chest pain", "difficulty breathing", "shortness of breath", "unconscious", "severe bleeding", "heavy bleeding", "stroke", "seizure", "fainting", "severe allergic reaction"];
+  const urgentWords = ["high fever", "vomiting", "dizziness", "infection", "severe pain", "severe headache", "persistent cough", "dehydration", "abdominal pain"];
+  const departments = [
+    { name: "ENT", terms: ["ear pain", "earache", "ear infection", "hearing", "tinnitus", "nose bleed", "sinus", "sore throat", "tonsil"] },
+    { name: "Dental", terms: ["tooth", "toothache", "gum", "dental"] },
+    { name: "Ophthalmology", terms: ["eye pain", "blurred vision", "red eye", "vision"] },
+    { name: "Dermatology", terms: ["rash", "skin", "eczema", "acne", "itching"] },
+    { name: "Orthopedics", terms: ["bone", "joint", "back pain", "fracture", "sprain", "knee pain"] },
+    { name: "Cardiology", terms: ["palpitation", "heart", "blood pressure"] },
+    { name: "Gastroenterology", terms: ["stomach", "gastric", "diarrhea", "constipation", "abdominal"] },
+    { name: "Respiratory", terms: ["asthma", "wheezing", "cough", "breathing"] },
+    { name: "Neurology", terms: ["migraine", "headache", "numbness"] },
+    { name: "Pediatrics", terms: ["baby", "child", "infant"] },
+    { name: "Gynecology", terms: ["pregnancy", "menstrual", "period pain"] },
+    { name: "Urology", terms: ["urine", "urinary", "kidney"] },
+  ];
+  const recommended = departments.find(({ terms }) => terms.some((term) => text.includes(term)))?.name || "General Medicine";
 
-  const emergencyWords = [
-  "chest pain",
-  "difficulty breathing",
-  "shortness of breath",
-  "unconscious",
-  "severe bleeding",
-  "heavy bleeding",
-  "stroke",
-  "seizure",
-  "fainting",
-  "severe allergic reaction"
-];
-
-const urgentWords = [
-  "high fever",
-  "fever",
-  "vomiting",
-  "dizziness",
-  "infection",
-  "severe pain",
-  "severe headache",
-  "persistent cough",
-  "dehydration",
-  "abdominal pain"
-];
-
-const followupWords = [
-  "follow up",
-  "routine",
-  "checkup",
-  "report",
-  "mild headache",
-  "common cold",
-  "runny nose",
-  "sore throat",
-  "mild cough"
-];
-  if (emergencyWords.some((word) => text.includes(word))) {
-    return {
-      urgency: "Emergency",
-      department: "Emergency Care",
-      waitTime: "Immediate attention recommended",
-      advice: "Please contact emergency services or visit emergency care now.",
-    };
-  }
-
-  if (urgentWords.some((word) => text.includes(word))) {
-    return {
-      urgency: "Urgent",
-      department: "",
-      waitTime: "Estimated 10-20 minutes",
-      advice: "Keep previous reports ready and drink water unless advised otherwise.",
-    };
-  }
-
-  if (followUpWords.some((word) => text.includes(word))) {
-    return {
-      urgency: "Normal",
-      department: "",
-      waitTime: "Estimated 20-40 minutes",
-      advice: "Bring your earlier prescription, reports, and medicine list.",
-    };
-  }
-
-  return {
-    urgency: "Normal",
-    department: "",
-    waitTime: "Estimated 20-45 minutes",
-    advice: "Share clear symptoms, duration, allergies, and current medicines with the doctor.",
-  };
+  if (emergencyWords.some((word) => text.includes(word))) return { urgency: "Emergency", department: "Emergency Care", waitTime: "Immediate attention recommended", advice: "Please contact emergency services or go to the nearest emergency department now." };
+  if (urgentWords.some((word) => text.includes(word))) return { urgency: "Urgent", department: recommended, waitTime: "Priority review recommended", advice: "Book the recommended department promptly and bring any previous reports." };
+  return { urgency: "Normal", department: recommended, waitTime: "Standard appointment", advice: "Book the recommended department and share symptoms, duration, allergies, and current medicines." };
 };
 
 export default function Patient({
@@ -105,6 +55,9 @@ export default function Patient({
     date: getLocalDateInputValue(),
     time: "12:00",
     reason: "",
+    bookingFor: "self",
+    familyMemberName: "",
+    familyMemberContact: "",
   });
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [isBooking, setIsBooking] = useState(false);
@@ -171,9 +124,17 @@ export default function Patient({
 
   const suggestion = analyzeReason(form.reason);
   setAiSuggestion(suggestion);
+  const normalizedDepartment = suggestion.department.toLowerCase();
+  const matchingDoctor = doctors.find((doctor) => doctor.department?.toLowerCase().includes(normalizedDepartment));
+  setForm((previous) => ({
+    ...previous,
+    department: suggestion.department,
+    doctorId: matchingDoctor ? matchingDoctor.id || matchingDoctor._id : previous.doctorId,
+    doctorName: matchingDoctor ? matchingDoctor.fullName : previous.doctorName,
+  }));
 };
 
- const handleBookAppointment = async (event) => {
+  const handleBookAppointment = async (event) => {
   event.preventDefault();
 
   if (isBooking) return;
@@ -183,6 +144,11 @@ export default function Patient({
   const date = form.date?.trim();
   const time = form.time?.trim();
   const reason = form.reason?.trim();
+
+  if (form.bookingFor === "family" && (!form.familyMemberName.trim() || !form.familyMemberContact.trim())) {
+    setBookingMessage("Enter the family member's username and email to continue.");
+    return;
+  }
 
   if (!doctorName) {
     setBookingMessage(doctors.length === 0 ? "No doctors are available right now." : "Please select a doctor.");
@@ -211,8 +177,11 @@ export default function Patient({
     date: date,
     time: time,
     reason: reason,
-    patientName: patientName,
-    patientEmail: patientEmail,
+    patientName: form.bookingFor === "family" ? form.familyMemberName.trim() : patientName,
+    patientContact: form.bookingFor === "family" ? form.familyMemberContact.trim() : patientEmail,
+    relationship: form.bookingFor === "family" ? "Family member" : "Self",
+    paymentMethod: "Pay at Hospital",
+    paymentStatus: "Pending",
     aiNote: aiSuggestion
       ? `${aiSuggestion.urgency} | ${aiSuggestion.waitTime} | ${aiSuggestion.advice}`
       : "Not analyzed",
@@ -231,7 +200,7 @@ export default function Patient({
     }));
 
     setAiSuggestion(null);
-    setBookingMessage(`Appointment booked. Token number: ${createdAppointment.token}`);
+    setBookingMessage(`Appointment booked. Token number: ${createdAppointment.token}. Payment: ${createdAppointment.paymentStatus}.`);
   } catch (error) {
     console.error("Booking error:", error);
     setBookingMessage(error.message || "Failed to book appointment. Please try again.");
@@ -321,6 +290,26 @@ export default function Patient({
               value={form.department}
               onChange={handleChange}
             />
+            <fieldset className="booking-for">
+              <legend>Who is this appointment for?</legend>
+              <div className="booking-choice-buttons">
+                <button type="button" className={form.bookingFor === "self" ? "selected" : ""} onClick={() => setForm((previous) => ({ ...previous, bookingFor: "self", familyMemberName: "", familyMemberContact: "" }))}>
+                  <span className="choice-title">Book for myself</span>
+                  <span className="choice-subtitle">Use my registered account</span>
+                </button>
+                <button type="button" className={form.bookingFor === "family" ? "selected" : ""} onClick={() => setForm((previous) => ({ ...previous, bookingFor: "family" }))}>
+                  <span className="choice-title">Book for a family member</span>
+                  <span className="choice-subtitle">Add their details below</span>
+                </button>
+              </div>
+              {form.bookingFor === "family" && (
+                <div className="family-details">
+                  <div className="family-banner">Family member appointment details</div>
+                  <input name="familyMemberName" placeholder="Family member's username" value={form.familyMemberName} onChange={handleChange} required />
+                  <input name="familyMemberContact" type="email" placeholder="Family member's email address" value={form.familyMemberContact} onChange={handleChange} required />
+                </div>
+              )}
+            </fieldset>
             <input
               name="date"
               type="date"
@@ -335,23 +324,34 @@ export default function Patient({
               onChange={handleChange}
               required
             />
+            <div className="ai-feature-intro">
+              <strong>AI Care Assistant</strong>
+              <span>Describe your symptoms to receive visit-priority guidance before booking.</span>
+            </div>
             <textarea
               name="reason"
               placeholder="Reason for appointment"
               value={form.reason}
               onChange={handleChange}
             />
+            <div className="payment-options">
+              <strong>Payment at hospital</strong>
+              <p>Consultation fee: <b>Rs. 1,500</b></p>
+              <span className="payment-note">Please pay at the hospital reception before your consultation. Your token will be marked payment pending.</span>
+            </div>
             <button className="secondary-action" type="button" onClick={handleAiAnalyze}>
-              AI Analyze Symptoms
+              Get AI Symptom Guidance
             </button>
             {aiSuggestion && (
               <div className="ai-box">
                 <div className="ai-box-title">
-                  <span>AI Visit Assistant</span>
+                  <span>AI Care Assistant Result</span>
                   <strong>{aiSuggestion.urgency}</strong>
                 </div>
+                <p><strong>Recommended department: {aiSuggestion.department}</strong></p>
                 <p>{aiSuggestion.waitTime}</p>
                 <p>{aiSuggestion.advice}</p>
+                <p className="ai-disclaimer">This guidance supports booking only and is not a medical diagnosis.</p>
               </div>
             )}
             <button type="submit" disabled={isBooking}>
@@ -382,6 +382,7 @@ export default function Patient({
                   <span className={`status-pill ${appointment.status.toLowerCase().replace(" ", "-")}`}>
                     {appointment.status}
                   </span>
+                  <span className={`payment-pill ${appointment.paymentStatus.toLowerCase()}`}>{appointment.paymentStatus === "Paid" ? "Payment paid" : "Payment pending"}</span>
                   {(appointment.status === "Waiting" || appointment.status === "In Consultation") && (
                     <div className="appointment-actions">
                       <button

@@ -1,5 +1,9 @@
 .patient-email { margin-left: auto; color: #ccfbf1; font-size: 0.9rem; overflow-wrap: anywhere; }
 
+.booking-for{display:flex;flex-wrap:wrap;gap:10px;padding:13px;border:1px solid #99f6e4;border-radius:8px;background:#f0fdfa}.booking-for legend{padding:0 4px;color:#0f766e;font-size:13px;font-weight:800}.booking-choice-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}.booking-choice-buttons button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 10px;border:1px solid #99f6e4;border-radius:7px;background:#fff;color:#0f766e;font-weight:700;cursor:pointer;text-align:left;transition:all .2s ease}.booking-choice-buttons button.selected{border-color:#0f766e;background:#0f766e;color:#fff;box-shadow:0 8px 18px rgba(15,118,110,.12)}.choice-title{font-size:14px;font-weight:800}.choice-subtitle{font-size:12px;opacity:.85}.family-details{display:flex;flex-direction:column;gap:9px;width:100%;margin-top:4px}.family-banner{padding:8px 10px;border-radius:6px;background:#ecfeff;color:#0f766e;font-size:12px;font-weight:700;border:1px solid #a5f3fc}.family-details input{width:100%}
+
+.payment-options{display:flex;flex-direction:column;gap:6px;padding:13px;border:1px solid #bfdbfe;border-radius:8px;background:#f8fbff}.payment-options strong{color:#1d4ed8;font-size:14px}.payment-options p{color:#334155;font-size:14px}.payment-note{color:#64748b;font-size:12px;line-height:1.4}.payment-pill{display:inline-flex;align-items:center;width:max-content;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}.payment-pill.paid{background:#dcfce7;color:#166534}.payment-pill.pending{background:#fef3c7;color:#92400e}
+
 .stacked-form input:focus,
 .stacked-form select:focus,
 .stacked-form textarea:focus,

@@ -1,6 +1,6 @@
- .home-container {
+.home-container {
   min-height: 100vh;
-  background: #0f766e;
+  background: #f7fbfa;
 }
 
 .navbar {
@@ -10,7 +10,7 @@
   align-items: center;
   gap: 20px;
   color: #fff;
-  background: #0f766e;
+  background: #0b4f4b;
 }
 
 .navbar h2 {
@@ -18,6 +18,8 @@
   font-size: 1.35rem;
   letter-spacing: -0.03em;
 }
+
+.brand{display:flex;align-items:center;gap:10px;padding:0;border:0;background:transparent;color:#fff;font:800 1.3rem Arial,sans-serif;letter-spacing:-.04em;cursor:pointer}.brand>span:last-child>span{color:#8ce7d9}.brand-mark{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#a7f3d0;color:#075a52;font-size:25px;line-height:1}.nav-actions{display:flex;align-items:center;gap:20px;margin-left:auto}.nav-link{border:0;background:transparent;color:#d1fae5;font:600 14px Arial,sans-serif;cursor:pointer}.nav-link:hover{color:#fff}
 
 .login-btn {
   margin-left: auto;
@@ -37,7 +39,7 @@
 
 .hero-section {
   position: relative;
-  min-height: calc(100vh - 72px);
+  min-height: min(690px, calc(100vh - 72px));
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -47,18 +49,20 @@
 
 .overlay {
   position: relative;
-  width: min(100% - 40px, 780px);
+  width: min(100% - 40px, 900px);
   padding: clamp(32px, 7vw, 72px);
   text-align: center;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 20px;
-  background: rgba(15, 23, 42, 0.56);
+  background: linear-gradient(135deg,rgba(7,55,51,.84),rgba(15,23,42,.67));
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.32);
   backdrop-filter: blur(5px);
 }
 
 .overlay h1 { margin: 0 0 16px; font-size: clamp(2.25rem, 6vw, 4rem); line-height: 1.05; letter-spacing: -0.045em; }
 .overlay p { margin: 0; font-size: clamp(1rem, 2vw, 1.25rem); line-height: 1.6; color: #ecfeff; }
+.hero-kicker{display:flex;align-items:center;justify-content:center;gap:9px;margin:0 0 18px!important;font-size:11px!important;font-weight:800;letter-spacing:.12em;color:#a7f3d0!important}.hero-kicker span{width:24px;height:2px;background:#a7f3d0}.overlay h1 em{display:block;color:#a7f3d0;font-style:normal}.hero-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:30px}.primary-cta,.secondary-cta{padding:13px 18px;border-radius:9px;font:700 14px Arial,sans-serif;cursor:pointer}.primary-cta{border:1px solid #b7f7e7;background:#b7f7e7;color:#064e48}.primary-cta span{margin-left:8px;font-size:18px}.secondary-cta{border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.08);color:#fff}.trust-row{display:flex;justify-content:center;flex-wrap:wrap;gap:18px;margin-top:28px;color:#d1fae5;font-size:12px;font-weight:700}.home-features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;width:min(1120px,calc(100% - 40px));margin:-44px auto 44px;position:relative;z-index:2}.home-features article{padding:25px;background:#fff;border:1px solid #dbe9e6;border-radius:14px;box-shadow:0 12px 30px rgba(15,23,42,.08)}.feature-icon{color:#0f766e;font:800 12px Arial,sans-serif;letter-spacing:.08em}.home-features h2{margin:13px 0 8px;color:#173a37;font-size:19px;letter-spacing:-.03em}.home-features p{color:#64748b;font-size:14px;line-height:1.55}
 
 @media (max-width: 520px) { .overlay { width: calc(100% - 28px); padding: 32px 22px; border-radius: 16px; } }
+@media (max-width:700px){.nav-link{display:none}.home-features{grid-template-columns:1fr;margin:0 auto 28px}.hero-section{min-height:620px}.trust-row{gap:9px}.navbar{min-height:64px}}

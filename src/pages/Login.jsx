@@ -33,6 +33,15 @@ export default function Login({ setPage, onLogin, currentUser }) {
       <div className="login-container">
         <h1>Login</h1>
 
+        <div className="login-role-box">
+          <label className="role-label">Sign in as</label>
+          <select value={role} onChange={(e) => setRole(e.target.value)} aria-label="Login role">
+            <option value="Patient">Patient</option>
+            <option value="Doctor">Doctor</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+
         <input
           type="email"
           placeholder="Enter Email"
@@ -46,13 +55,6 @@ export default function Login({ setPage, onLogin, currentUser }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="Patient">Patient</option>
-          <option value="Doctor">Doctor</option>
-          <option value="Admin">Admin</option>
-        
-        </select>
 
         <button onClick={handleLogin}>Login</button>
 

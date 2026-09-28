@@ -28,20 +28,24 @@
 }
 
 .auth-card input,
-.auth-card select {
+.auth-card select,
+.auth-card textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 12px 14px;
-  margin-bottom: 15px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 14px;
   outline: none;
+  background: #ffffff;
+  color: #0f172a;
 }
 
 .auth-card input:focus,
-.auth-card select:focus {
-  border-color: #2563eb;
+.auth-card select:focus,
+.auth-card textarea:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
 
 .auth-card button {
@@ -49,7 +53,7 @@
   padding: 12px;
   border: none;
   border-radius: 8px;
-  background: #2563eb;
+  background: #0f766e;
   color: white;
   font-size: 15px;
   font-weight: 600;
@@ -57,7 +61,7 @@
 }
 
 .auth-card button:hover {
-  background: #1d4ed8;
+  background: #115e59;
 }
 
 .auth-link {
@@ -70,3 +74,60 @@
   color: #2563eb;
   padding: 0;
 }
+
+.login-role-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.role-label {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 13px 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.payment-options strong {
+  color: #1d4ed8;
+  font-size: 14px;
+}
+
+.payment-options p {
+  margin: 0;
+  color: #334155;
+  font-size: 14px;
+}
+
+.booking-message {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 4px solid #14b8a6;
+  border-radius: 8px;
+  background: #ecfeff;
+  color: #0f766e;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #0f766e;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+

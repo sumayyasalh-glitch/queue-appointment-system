@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../styles/Dashboard.css";
+
 import "../styles/Admin.css";
 
 const getLocalDateInputValue = (date = new Date()) => {
@@ -8,11 +9,30 @@ const getLocalDateInputValue = (date = new Date()) => {
   return localDate.toISOString().split("T")[0];
 };
 
+const departments = [
+  "General Medicine",
+  "ENT",
+  "Dental",
+  "Ophthalmology",
+  "Dermatology",
+  "Orthopedics",
+  "Cardiology",
+  "Gastroenterology",
+  "Respiratory",
+  "Neurology",
+  "Pediatrics",
+  "Gynecology",
+  "Urology",
+  "Emergency Care",
+];
+const queuedStatuses = ["Pending", "Confirmed", "Waiting"];
+
 export default function Admin({
   users,
   addUser,
   appointments,
   updateAppointmentStatus,
+  updatePaymentStatus,
   onLogout,
   setPage,
 }) {
@@ -26,14 +46,24 @@ export default function Admin({
 
   const doctors = users.filter((user) => user.role === "Doctor");
   const patients = users.filter((user) => user.role === "Patient");
-  const waiting = appointments.filter((item) => item.status === "Waiting");
+  const waiting = appointments.filter((item) => queuedStatuses.includes(item.status));
   const inConsultation = appointments.filter((item) => item.status === "In Consultation");
   const completed = appointments.filter((item) => item.status === "Completed");
   const today = getLocalDateInputValue();
   const todayAppointments = appointments.filter((apt) => apt.date === today);
 
   const handleChange = (event) => {
-    setForm({ ...form, [event.target.name]: event.target.value });
+    const { name, value } = event.target;
+    setForm((previous) => {
+      if (name === "role") {
+        return {
+          ...previous,
+          role: value,
+          department: value === "Admin" ? "" : previous.department,
+        };
+      }
+      return { ...previous, [name]: value };
+    });
   };
 
   const handleAddUser = async (event) => {
@@ -41,6 +71,11 @@ export default function Admin({
 
     if (!form.fullName || !form.password || !form.email) {
       alert("Fill all user fields");
+      return;
+    }
+
+    if (form.role === "Doctor" && !form.department) {
+      alert("Select a department for the doctor");
       return;
     }
 
@@ -59,7 +94,7 @@ export default function Admin({
   };
 
   return (
-    <main className="dashboard-shell">
+    <main className="dashboard-shell admin-page">
       <header className="dashboard-topbar">
         <div>
           <p className="eyebrow">Admin Panel</p>
@@ -138,12 +173,10 @@ export default function Admin({
               <option>Doctor</option>
               <option>Admin</option>
             </select>
-            <input
-              name="department"
-              placeholder="Department"
-              value={form.department}
-              onChange={handleChange}
-            />
+            {form.role === "Doctor" && <select name="department" value={form.department} onChange={handleChange} required>
+              <option value="">Select doctor department</option>
+              {departments.map((department) => <option key={department} value={department}>{department}</option>)}
+            </select>}
             <button type="submit">Add User</button>
           </form>
         </div>
@@ -162,6 +195,7 @@ export default function Admin({
                   <th>Patient</th>
                   <th>Doctor</th>
                   <th>Date</th>
+                  <th>Payment</th>
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
@@ -170,11 +204,22 @@ export default function Admin({
                 {appointments.map((appointment) => (
                   <tr key={appointment.id}>
                     <td>{appointment.token}</td>
-                  <td>{appointment.patientName}</td>
-                  <td>{appointment.doctorName}</td>
-                  <td>{appointment.date} {appointment.time}</td>
-                  <td>
-                    <span className={`status-pill ${appointment.status.toLowerCase().replace(" ", "-")}`}>
+                    <td>{appointment.patientName}</td>
+                    <td>{appointment.doctorName}</td>
+                    <td>{appointment.date} {appointment.time}</td>
+                    <td>
+                      <select
+                        value={appointment.paymentStatus || "Pending"}
+                        onChange={(event) =>
+                          updatePaymentStatus(appointment.id, event.target.value)
+                        }
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                      </select>
+                    </td>
+                    <td>
+                      <span className={`status-pill ${appointment.status.toLowerCase().replace(" ", "-")}`}>
                         {appointment.status}
                       </span>
                     </td>

@@ -17,6 +17,11 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  if (config.skipAuth) {
+    delete config.skipAuth;
+    return config;
+  }
+
   const token = localStorage.getItem("queuecare_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -33,8 +38,12 @@ export const normalizeAppointment = (appointment) => {
     _id: appointment._id || appointment.id,
     patientId: patient._id || patient.id || null,
     doctorId: doctor._id || doctor.id || null,
-    patientName: patient.fullName || "Patient",
-    patientEmail: patient.email || "",
+    patientName: appointment.patientName || patient.fullName || "Patient",
+    patientEmail: appointment.patientContact || patient.email || "",
+    bookingOwnerName: patient.fullName || "Patient",
+    relationship: appointment.relationship || "Self",
+    paymentMethod: "Pay at Hospital",
+    paymentStatus: appointment.paymentStatus || "Pending",
     doctorName: doctor.fullName || "Doctor",
     doctorEmail: doctor.email || "",
     date: appointment.date ? toLocalDateInputValue(appointment.date) : "",
